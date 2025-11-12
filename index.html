@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="jquery.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div id="app">
+        <h1>TO DO</h1>
+        <form id="add-form">
+            <input id="new-task" placeholder="Nowe zadanie..." autocomplete="off" />
+            <button type="submit">Dodaj</button>
+        </form>
+
+        <div class="controls">
+            <input id="search" placeholder="Szukaj..." autocomplete="off" />
+            <div class="filters">
+                <button data-filter="all" class="is-active">Wszystkie</button>
+                <button data-filter="active">Aktywne</button>
+                <button data-filter="done">Wykonane</button>
+            </div>
+            <div class="sort">
+                <button id="sort-alpha">Sortuj A→Z</button>
+                <button id="sort-added">Sortuj wg dodania</button>
+            </div>
+        </div>
+
+        <ul id="list" class="tasks"></ul>
+        <p id="counter">0 zadań, 0 wykonane</p>
+    </div>
+    <button id="clearStorageTest">clear local storage</button>
+</body>
+</html>
