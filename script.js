@@ -38,6 +38,8 @@ function printOutNewestTasks() {
                     <p>id: ${task.id}</p>
                     <input type='hidden' value='${task.id}'>
                     Done: <input type='checkbox' class='doneCheckbox' ${task.done ? "checked" : ""}>
+                    <p>Created at: ${task.createdAt}</p>
+                    <button class='delete-btn'>delete task</button>
                 </div>
             </li>
         `;
@@ -58,9 +60,17 @@ function verifyTaskName() {
     }
     return true;
 }
+
+function reautoIncrementTasks() {
+    tasks.forEach((task, index) => {
+        task.id = index + 1;
+    });
+    updateTasksLocalStorage();
+}
+
 function addTaskAndUpdateLocalStorage() {
     const taskNameInput = getTaskNameInput();
-    const newTask = {id: getNewTaskId(), taskName: taskNameInput, done: false};
+    const newTask = {id: getNewTaskId(), taskName: taskNameInput, done: false, createdAt: new Date};
     tasks.push(newTask);
 
     $("#new-task").val("");
@@ -101,4 +111,27 @@ $("#list").on("change", ".doneCheckbox", function(){
     
     localStorage.setItem("tasks", JSON.stringify(tasks));
     updateCounter();
+});
+
+$("#list").on("click", ".delete-btn", function() {
+    tasks = getNewestTasksLocalStorageOrEmpty();
+
+    const $li = $(this).closest("li"); // fade the whole <li>
+    const taskId = parseInt($li.find("input[type='hidden']").val(), 10);
+
+    // Animate fade out, then update tasks and re-render
+    $li.fadeOut(400, () => {
+        // Remove task from array
+        tasks = tasks.filter(task => task.id !== taskId);
+
+        // Reassign IDs
+        tasks.forEach((task, index) => task.id = index + 1);
+
+        // Save to localStorage
+        updateTasksLocalStorage();
+
+        // Update UI and counter
+        printOutNewestTasks();
+        updateCounter();
+    });
 });
