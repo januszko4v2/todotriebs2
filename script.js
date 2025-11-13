@@ -33,7 +33,7 @@ function printOutNewestTasks() {
     tasks.forEach(function(task) {
         const newTaskHTMLstring = `
             <li>
-                <div class='task-container'>
+                <div class='task-container ${task.done ? "done" : ""}'>
                     <h2>${task.taskName}</h2>
                     <p>id: ${task.id}</p>
                     <input type='hidden' value='${task.id}'>
@@ -95,7 +95,7 @@ function printOutDoneTasks() {
     doneTasks.forEach(function(task) {
         const newTaskHTMLstring = `
             <li>
-                <div class='task-container'>
+                <div class='task-container ${task.done ? "done" : ""}'>
                     <h2>${task.taskName}</h2>
                     <p>id: ${task.id}</p>
                     <input type='hidden' value='${task.id}'>
@@ -159,9 +159,11 @@ $("#deleteDoneTasksConfirm-btn").click(() => {
     }
 });
 
+
 $("#list").on("change", ".doneCheckbox", function(){
     tasks = getNewestTasksLocalStorageOrEmpty();
     
+    const $taskContainer = $(this).closest(".task-container");
     const hiddenInput = $(this).closest(".task-container").find("input[type='hidden']");
     const taskId = hiddenInput.val();
 
@@ -169,6 +171,7 @@ $("#list").on("change", ".doneCheckbox", function(){
     if (task) {
         task.done = $(this).is(":checked");
     }
+    $taskContainer.toggleClass("done", task.done);
     
     localStorage.setItem("tasks", JSON.stringify(tasks));
     updateCounter();
