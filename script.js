@@ -52,20 +52,25 @@ function printOutNewestTasks() {
         $newTask.fadeIn(400); // 400ms is the default duration
     });
 }
+function printOutTasksAtoZ() {
+    tasks = getNewestTasksLocalStorageOrEmpty();
+    tasks.sort((a, b) => a.taskName.localeCompare(b.taskName));
+    updateTasksLocalStorage();
+    printOutNewestTasks();
+}
+function printOutTasksByDate() {
+    tasks = getNewestTasksLocalStorageOrEmpty();
+    tasks.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    updateTasksLocalStorage();
+    printOutNewestTasks();
+}
 function verifyTaskName() {
     const taskName = getTaskNameInput();
 
-    if ((taskName.length < 3) || (taskName.trim() == "")) {
+    if ((taskName.trim().length < 3)) {
         return false;
     }
     return true;
-}
-
-function reautoIncrementTasks() {
-    tasks.forEach((task, index) => {
-        task.id = index + 1;
-    });
-    updateTasksLocalStorage();
 }
 
 function addTaskAndUpdateLocalStorage() {
@@ -76,6 +81,34 @@ function addTaskAndUpdateLocalStorage() {
     $("#new-task").val("");
     updateTasksLocalStorage();
     updateCounter();
+}
+function printOutDoneTasks() {
+    tasks = getNewestTasksLocalStorageOrEmpty();
+    const doneTasks = tasks.filter(it => it.done == true);
+    const tasksList = $("#list");
+    tasksList.empty();
+    if (doneTasks.length == 0) {
+        tasksList.append("<p>No done tasks found.</p>");
+        return;
+    }
+    
+    doneTasks.forEach(function(task) {
+        const newTaskHTMLstring = `
+            <li>
+                <div class='task-container'>
+                    <h2>${task.taskName}</h2>
+                    <p>id: ${task.id}</p>
+                    <input type='hidden' value='${task.id}'>
+                    Done: <input type='checkbox' class='doneCheckbox' ${task.done ? "checked" : ""}>
+                    <p>Created at: ${task.createdAt}</p>
+                    <button class='delete-btn'>delete task</button>
+                </div>
+            </li>
+        `;
+        const $newTask = $(newTaskHTMLstring).hide();
+        tasksList.append($newTask);
+        $newTask.fadeIn(400);
+    });
 }
 
 $("#add-form").on("submit", function(e) {
@@ -96,6 +129,34 @@ $("#clearStorageTest").click(() => {
 $(document).ready(() => {
     printOutNewestTasks();
     updateCounter();
+});
+$("#sort-alpha").click(() => {
+    printOutTasksAtoZ();
+    $("#search").val("");
+});
+$("#sort-added").click(() => {
+    printOutTasksByDate();
+    $("#search").val("");
+});
+$("[data-filter='done']").click(() => {
+    printOutDoneTasks();
+});
+$("[data-filter='all']").click(() => {
+    printOutNewestTasks();  
+});
+$("#deleteDoneTasksConfirm-btn").click(() => {
+    if (confirm("Delete all done tasks?")) {
+        tasks = getNewestTasksLocalStorageOrEmpty();
+
+        tasks = tasks.filter(it => it.done == false);
+        tasks.forEach((task, index) => task.id = index + 1);
+
+        updateTasksLocalStorage();
+
+        // Update UI and counter
+        printOutNewestTasks();
+        updateCounter();
+    }
 });
 
 $("#list").on("change", ".doneCheckbox", function(){
