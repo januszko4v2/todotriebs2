@@ -8,6 +8,7 @@ function getNewestTasksLocalStorageOrEmpty() {
     return saved ? JSON.parse(saved) : [];
 }
 
+// zeby nie sprawdzal tasks tylko aktualnie wyswietlone taski
 function updateCounter() {
     tasks = getNewestTasksLocalStorageOrEmpty();
     let tasksCount = tasks.length;
@@ -159,6 +160,31 @@ $("#deleteDoneTasksConfirm-btn").click(() => {
     }
 });
 
+$("#search").on("input", () => {
+    tasks = getNewestTasksLocalStorageOrEmpty();
+    let searchText = $("#search").val();
+
+    let tasksStartingWithSearch = tasks.filter(it => it.taskName.toLowerCase().includes(searchText.toLowerCase()));
+
+
+    $("#list").empty();
+    tasksStartingWithSearch.forEach(function(task) {
+    const newTaskHTMLstring = `
+        <li>
+            <div class='task-container ${task.done ? "done" : ""}'>
+                <h2>${task.taskName}</h2>
+                <p>id: ${task.id}</p>
+                <input type='hidden' value='${task.id}'>
+                Done: <input type='checkbox' class='doneCheckbox' ${task.done ? "checked" : ""}>
+                <p>Created at: ${task.createdAt}</p>
+                <button class='delete-btn'>delete task</button>
+            </div>
+        </li>
+    `;
+    $("#list").append(newTaskHTMLstring);
+    });
+});
+
 
 $("#list").on("change", ".doneCheckbox", function(){
     tasks = getNewestTasksLocalStorageOrEmpty();
@@ -198,4 +224,22 @@ $("#list").on("click", ".delete-btn", function() {
         printOutNewestTasks();
         updateCounter();
     });
+});
+
+$("#export-btn").click(function() {
+    $("#export-textarea").val(JSON.stringify(getNewestTasksLocalStorageOrEmpty()));
+});
+
+$("#import-btn").click(function() {
+    try {
+        tasks = JSON.parse($("#import-textarea").val())
+        updateTasksLocalStorage();
+
+        printOutNewestTasks();
+        updateCounter();
+        $("#import-textarea").val("");
+    }
+    catch (e) {
+        alert("Invalid JSON");
+    }
 });
