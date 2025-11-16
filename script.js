@@ -37,6 +37,7 @@ function printOutNewestTasks() {
                 <div class='task-container ${task.done ? "done" : ""}'>
                     <h2>${task.taskName}</h2>
                     <p>id: ${task.id}</p>
+                    <input type='hidden' class='editInput' value='${task.taskName}'>
                     <input type='hidden' value='${task.id}'>
                     Done: <input type='checkbox' class='doneCheckbox' ${task.done ? "checked" : ""}>
                     <p>Created at: ${task.createdAt}</p>
@@ -99,6 +100,7 @@ function printOutDoneTasks() {
                 <div class='task-container ${task.done ? "done" : ""}'>
                     <h2>${task.taskName}</h2>
                     <p>id: ${task.id}</p>
+                    <input type='hidden' class='editInput' value='${task.taskName}'>
                     <input type='hidden' value='${task.id}'>
                     Done: <input type='checkbox' class='doneCheckbox' ${task.done ? "checked" : ""}>
                     <p>Created at: ${task.createdAt}</p>
@@ -174,6 +176,7 @@ $("#search").on("input", () => {
             <div class='task-container ${task.done ? "done" : ""}'>
                 <h2>${task.taskName}</h2>
                 <p>id: ${task.id}</p>
+                <input type='hidden' class='editInput' value='${task.taskName}'>
                 <input type='hidden' value='${task.id}'>
                 Done: <input type='checkbox' class='doneCheckbox' ${task.done ? "checked" : ""}>
                 <p>Created at: ${task.createdAt}</p>
@@ -184,6 +187,51 @@ $("#search").on("input", () => {
     $("#list").append(newTaskHTMLstring);
     });
 });
+
+$("#list").on("dblclick", ".task-container h2", function() {
+    const editInput = $(this).closest(".task-container").find(".editInput");
+    $(this).hide();
+    editInput.attr("type", "text").focus();
+});
+$("#list").on("keydown", ".editInput", function (e) {
+    if (e.key === "Escape") {
+        const container = $(this).closest(".task-container");
+        const title = container.find("h2");
+
+        // reset input text to the original title
+        $(this).val(title.text());
+
+        // hide input and show title
+        $(this).attr("type", "hidden");
+        title.show();
+    }
+});
+$("#list").on("keydown", ".editInput", function (e) {
+    if (e.key === "Enter") {
+        const container = $(this).closest(".task-container");
+        const title = container.find("h2");
+        const newName = $(this).val();
+
+        // Update UI text
+        title.text(newName).show();
+        $(this).attr("type", "hidden");
+
+        // Save to localStorage
+        tasks = getNewestTasksLocalStorageOrEmpty();
+
+        // ID is the second hidden input
+        const taskId = container.find("input[type='hidden']").eq(1).val();
+
+        const task = tasks.find(t => t.id == taskId);
+        if (task) {
+            task.taskName = newName;
+        }
+
+        updateTasksLocalStorage();
+        updateCounter();
+    }
+});
+
 
 
 $("#list").on("change", ".doneCheckbox", function(){
@@ -207,7 +255,7 @@ $("#list").on("click", ".delete-btn", function() {
     tasks = getNewestTasksLocalStorageOrEmpty();
 
     const $li = $(this).closest("li"); // fade the whole <li>
-    const taskId = parseInt($li.find("input[type='hidden']").val(), 10);
+    const taskId = parseInt($li.find("input[type='hidden']").eq(1).val(), 10);
 
     // Animate fade out, then update tasks and re-render
     $li.fadeOut(400, () => {

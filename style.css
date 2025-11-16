@@ -5,3 +5,7 @@
 .done h2{
     text-decoration: line-through;
 }
+h2 {
+    user-select: none;
+    cursor: text;
+}
