@@ -239,7 +239,7 @@ $("#list").on("change", ".doneCheckbox", function(){
     
     const $taskContainer = $(this).closest(".task-container");
     const hiddenInput = $(this).closest(".task-container").find("input[type='hidden']");
-    const taskId = hiddenInput.val();
+    const taskId = hiddenInput.eq(1).val();
 
     let task = tasks.find(it => it.id == taskId);
     if (task) {
